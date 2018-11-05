@@ -30,6 +30,7 @@ router.post('/:id', function (req, res) {
     var user_id = req.params.id;
     var email = req.body.email;
     var name = req.body.name;
+    var avatar = req.body.avatar;
 
     Account.findOneAndUpdate({_id: user_id}, req.body, {upsert: true}, function(err, user)
         {
@@ -37,6 +38,10 @@ router.post('/:id', function (req, res) {
             if (err)
             {
                 console.log("Error: " + err);
+            }
+            else
+            {
+                console.log("User updated: " + user_id + " " + req.body);
             }
         }
     );

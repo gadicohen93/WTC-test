@@ -1,7 +1,6 @@
 import React from 'react';
 import {hashHistory} from 'react-router';
-import {connect} from 'react-redux';
-import {updateUserObject} from 'AuthenticationActions'
+import AvatarPicker from './Avatar';
 
 class GetUser extends React.Component {
 
@@ -9,7 +8,7 @@ class GetUser extends React.Component {
       constructor(props)
       {
         super(props);
-        this.state = {editing: false, accountExists: true, userAccount: false, errorFetch: false, avatarURL:"es.png"};
+        this.state = {editing: false, accountExists: true, userAccount: false, errorFetch: false, avatarURL:"es.png", editAvatar:false};
       }
 
     onLoginSubmit(event) {
@@ -72,6 +71,7 @@ class GetUser extends React.Component {
                 body: JSON.stringify({
                     name: name,
                     email: email,
+                    avatar: this.state.avatarURL
                 }),
                 error: function()
                 {
@@ -94,8 +94,6 @@ class GetUser extends React.Component {
                     hashHistory.push('/');
                 }
                 else {
-                    alert("Login failed");
-                    console.log("Login failed");
                     this.setState({error:true});
                 }
 
@@ -111,11 +109,22 @@ class GetUser extends React.Component {
                 console.log(text);
             }).catch( (err) =>
             {
-                console.log(err + " < this is the error");
                 this.setState({errorFetch: true});
             });
         }
     }
+
+    editAvatar()
+    {
+        this.setState({editAvatar : true});
+    }
+
+
+     handleChange(val) {
+        // const val = event.target.value;
+        console.log(val + " handling change? " );
+        this.setState({avatarURL: val})
+      }
 
     render() {
 
@@ -125,7 +134,6 @@ class GetUser extends React.Component {
             warningText = "User doesn't exists";
         }
 
-    console.log("STATE" + JSON.stringify(this.state));
         if (this.state.userAccount)
         {
             warningText = "Success"
@@ -137,6 +145,17 @@ class GetUser extends React.Component {
         
         const avatarURL = "/img/flags-normal/" + this.state.avatarURL;
         let warningDiv = <span className="existsAccount"> {warningText} </span>;
+
+        let avatar;
+
+        if (this.state.editAvatar)
+        {
+            avatar =  <AvatarPicker handler={this.handleChange.bind(this)} value={this.state.avatarURL} />;
+        }
+        else
+        {
+            avatar =  <img src={avatarURL} className="avatar" onClick={this.editAvatar.bind(this)} />;
+        }
 
         if (!this.state.editing)
         {
@@ -165,7 +184,9 @@ class GetUser extends React.Component {
                                />
                         <input type="submit" value="Update user" /> {warningDiv}
                     </form>
-                    <img src={avatarURL} className="avatar"/>
+
+                    {avatar}
+                   
                 </div>
             );
         }

@@ -17,34 +17,6 @@ self.addEventListener('install', event => {
   );
 });
 
-
-// self.addEventListener('sync', function(event) {
-//   if (event.tag == "sendAll")
-//   {
-//     console.log("sync sync sync");    
-//   }
-//   // event.waitUntil(
-//   //   store.outbox('readonly').then(function(outbox) {
-//   //     return outbox.getAll();
-//   //   }).then(function(messages) {
-//   //     // send the messages
-//   //   }).catch(function(err) { console.error(err); });
-//   // );
-// });
-
-// While overkill for this specific sample in which there is only one cache,
-// this is one best practice that can be followed in general to keep track of
-// multiple caches used by a given service worker, and keep them all versioned.
-// It maps a shorthand identifier for a cache to a specific, versioned cache name.
-
-// Note that since global state is discarded in between service worker restarts, these
-// variables will be reinitialized each time the service worker handles an event, and you
-// should not attempt to change their values inside an event handler. (Treat them as constants.)
-
-// If at any point you want to force pages that use this service worker to start using a fresh
-// cache, then increment the CACHE_VERSION value. It will kick off the service worker update
-// flow and the old cache(s) will be purged as part of the activate event handler when the
-// updated service worker is activated.
 var CACHE_VERSION = 1;
 var CURRENT_CACHES = {
   'offline-posts': 'offline-posts-v' + CACHE_VERSION
@@ -52,25 +24,19 @@ var CURRENT_CACHES = {
 
 var idbDatabase;
 var IDB_VERSION = 1;
-var STOP_RETRYING_AFTER = 86400000; // One day, in milliseconds.
 var STORE_NAME = 'requests';
 
-// This is basic boilerplate for interacting with IndexedDB. Adapted from
-// https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
 function openDatabaseAndReplayRequests() {
   var indexedDBOpenRequest = indexedDB.open('offline-posts', IDB_VERSION);
 
-  // This top-level error handler will be invoked any time there's an IndexedDB-related error.
   indexedDBOpenRequest.onerror = function(error) {
     console.error('IndexedDB error:', error);
   };
 
-  // This should only execute if there's a need to create a new database for the given IDB_VERSION.
   indexedDBOpenRequest.onupgradeneeded = function() {
     this.result.createObjectStore(STORE_NAME, {keyPath: 'url'});
   };
 
-  // This will execute each time the database is opened.
   indexedDBOpenRequest.onsuccess = function() {
     idbDatabase = this.result;
     replayPostRequests();
@@ -87,32 +53,21 @@ openDatabaseAndReplayRequests();
 function replayPostRequests() {
   var savedRequests = [];
 
-  getObjectStore(STORE_NAME).openCursor().onsuccess = function(event) {
+  getObjectStore(STORE_NAME).openCursor().onsuccess = function(event) 
+  {
     // See https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB#Using_a_cursor
     var cursor = event.target.result;
-
-    if (cursor) {
-      // Keep moving the cursor forward and collecting saved requests.
+    if (cursor) 
+    {
       savedRequests.push(cursor.value);
       cursor.continue();
-    } else {
-      // At this point, we have all the saved requests.
-      console.log('About to replay %d saved Google Analytics requests...',
-        savedRequests.length);
-
-      savedRequests.forEach(function(savedRequest) {
-        var queueTime = Date.now() - savedRequest.timestamp;
-        if (queueTime > STOP_RETRYING_AFTER) {
-          getObjectStore(STORE_NAME, 'readwrite').delete(serialize(savedRequest));
-          console.log(' Request has been queued for %d milliseconds. ' +
-            'No longer attempting to replay.', queueTime);
-        } else {
-          // The qt= URL parameter specifies the time delta in between right now, and when the
-          // /collect request was initially intended to be sent. See
-          // https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#qt
-          var request = savedRequest.request;
-          
-        }
+    } 
+    else 
+    {
+    
+      savedRequests.forEach(function(savedRequest) 
+      {
+        var request = savedRequest.request;
       });
 
       sendInOrder(savedRequests);
@@ -120,81 +75,57 @@ function replayPostRequests() {
   };
 }
 
-self.addEventListener('sync', (event) => {
-  console.log("Eventz " + event);
-  if (event.tag == 'event1') {
-    event.waitUntil(doSomething())
-  }
-})
-
-
-function sendInOrder(requests) {
-  var sending = requests.reduce(function(prevPromise, serialized) {
-    console.log('Sending', JSON.stringify(serialized.request));
-    return prevPromise.then(function() {
-      return deserialize(serialized.request).then(function(request) {
+function sendInOrder(requests) 
+{
+  var sending = requests.reduce(function(prevPromise, serialized) 
+  {
+    return prevPromise.then(function() 
+    {
+      return deserialize(serialized.request).then(function(request) 
+      {
         return fetch(request).then(function(response) {
-          console.log("FETCHING::: " + JSON.stringify(request) + " " + response.status);
-
-            if (response.status < 400) {
-              // If sending the /collect request was successful, then remove it from the IndexedDB.
+            if (response.status < 400) 
+            {
               getObjectStore(STORE_NAME, 'readwrite').delete(request.url);
-              console.log(' Replaying succeeded.');
-            } else {
-              // This will be triggered if, e.g., Google Analytics returns a HTTP 50x response.
-              // The request will be replayed the next time the service worker starts up.
-              console.error(' Replaying failed:', response);
+              console.log('Replaying a request succeeded.');
+            } 
+            else 
+            {
+              console.error(' Replaying a request failed: ', response);
             }
-          }).catch(function(error) {
-            // This will be triggered if the network is still down. The request will be replayed again
-            // the next time the service worker starts up.
-            console.error(' Replaying failed:', error);
+          }).catch(function(error) 
+          {
+       
+            console.error(' Replaying a request failed:', error);
           });
 
       });
     });
-  }, Promise.resolve());
+  }, 
+  Promise.resolve());
   return sending;
 }
 
 
-self.addEventListener('fetch', function(event) {
-
-  console.log('Handling fetch event for', event.request.url);
+self.addEventListener('fetch', function(event) 
+{
   var parts = event.request.url.split('/');
   var lastSegment = parts.pop() || parts.pop();
-  console.log(lastSegment + " " + (lastSegment == "lastSegment"));
-
-      if (lastSegment == "triggerSync")
-        {
-          replayPostRequests();
-        }
+  if (lastSegment == "triggerSync")
+  {
+    replayPostRequests();
+  }
 
 
   event.respondWith(
     caches.open(staticCacheName).then(function(cache) {
-
-
-      
-      return cache.match(event.request).then(function(response) {
-        
-        
-        if (response) {
-          // If there is an entry in the cache for event.request, then response will be defined
-          // and we can just return it.
-          console.log(' Found response in cache:', response);
-
+      return cache.match(event.request).then(function(response) 
+      {
+        if (response) 
+        {
           return response;
         }
 
-        // Otherwise, if there is no entry in the cache for event.request, response will be
-        // undefined, and we need to fetch() the resource.
-        console.log(' No response for %s found in cache. ' +
-          'About to fetch from network...', event.request.url);
-
-        // We call .clone() on the request since we might use it in the call to cache.put() later on.
-        // Both fetch() and cache.put() "consume" the request, so we need to make a copy.
-        // (see https://fetch.spec.whatwg.org/#dom-request-clone)
         if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
           return response;
         }
@@ -202,42 +133,24 @@ self.addEventListener('fetch', function(event) {
 
         return fetch(event.request.clone())
         .then(function(response) {
-          console.log('  Response for %s from network is: %O',
-            event.request.url, response);
-
-          // Optional: add in extra conditions here, e.g. response.type == 'basic' to only cache
-          // responses from the same domain. See https://fetch.spec.whatwg.org/#concept-response-type
-          if (response.status < 400 && event.request.method !='POST') {
-            // This avoids caching responses that we know are errors (i.e. HTTP status code of 4xx or 5xx).
-            // One limitation is that, for non-CORS requests, we get back a filtered opaque response
-            // (https://fetch.spec.whatwg.org/#concept-filtered-response-opaque) which will always have a
-            // .status of 0, regardless of whether the underlying HTTP call was successful. Since we're
-            // blindly caching those opaque responses, we run the risk of caching a transient error response.
-            //
-            // We need to call .clone() on the response object to save a copy of it to the cache.
-            // (https://fetch.spec.whatwg.org/#dom-request-clone)
-            // cache.put(event.request, response.clone());
-          } else if (response.status >= 500) {
-            // If this is a Google Analytics ping then we want to retry it if a HTTP 5xx response
-            // was returned, just like we'd retry it if the network was down.
-            checkForAnalyticsRequest(event.request.clone());
+        
+          if (response.status < 400 && event.request.method !='POST') 
+          {
+            //do nothing
+          } 
+          else if (response.status >= 500) {
+            saveRequestForReplayingLater(event.request.clone());
           }
 
-          // Return the original response object, which will be used to fulfill the resource request.
           return response;
         })
         .catch(function(error) {
           console.log("NETWORK FAILURE!!");
-          // The catch() will be triggered for network failures. Let's see if it was a request for
-          // a Google Analytics ping, and save it to be retried if it was.
-          checkForAnalyticsRequest(event.request.clone());
+          saveRequestForReplayingLater(event.request.clone());
 
           return response;
         });
       }).catch(function(error) {
-        // This catch() will handle exceptions that arise from the match() or fetch() operations.
-        // Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
-        // It will return a normal response object that has the appropriate error code set.
         throw error;
       });
     })
@@ -271,34 +184,24 @@ function serialize(request)
   return Promise.resolve(serialized);
 }
 
-function deserialize(data) {
-  console.log(JSON.stringify(data));
-  //   var req = new Request(data.url, {
-  //     method: data.method,
-  //     headers: data.headers,
-  //     mode: 'same-origin', // need to set this properly
-  //     credentials: data.credentials,
-  //     redirect: 'manual'   // let browser handle redirects
-  // });
+function deserialize(data) 
+{
   delete data.credentials;
   delete data.mode;
   return  Promise.resolve(new Request(data.url, data));;
 }
 
-function checkForAnalyticsRequest(request) {
-  console.log("saving requestUrl");
-  // Construct a URL object (https://developer.mozilla.org/en-US/docs/Web/API/URL.URL)
-  // to make it easier to check the various components without dealing with string parsing.
-  // var url = new URL(request.url);
-    console.log('  Storing Google Analytics request in IndexedDB ' +
-      'to be replayed later.');
-    saveAnalyticsRequest(request);
+function saveRequestForReplayingLater(request) 
+{
+    saveRequest(request);
 }
 
-function saveAnalyticsRequest(request) {
-if (request.method =='POST'){
-  serialize(request).then(function(serialized) {
-    console.log(JSON.stringify(serialized) + " < < <");
+function saveRequest(request) 
+{
+if (request.method =='POST')
+{
+  serialize(request).then(function(serialized) 
+  {
     getObjectStore(STORE_NAME, 'readwrite').add({
         url: request.url,
         request: serialized,
@@ -307,6 +210,5 @@ if (request.method =='POST'){
   });
 }
   
-  // 
   
 }
