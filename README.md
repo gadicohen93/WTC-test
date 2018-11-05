@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-This is a work in progress! If you stumbled upon this repo, take into consideration it is not ready yet.
 
-[Demo](https://react-nodejs-boilerplate-demo.herokuapp.com/) of the boilerplate in action.
-=======
 Requirements and Specs:
 Develop an endpoint `/user/:id` that get and edit the user profile (Name, Email, Avatar) 
 endpoint:
@@ -11,7 +7,6 @@ endpoint:
 		GET
 		in: id
 		out: success, name, email, avatar
->>>>>>> 1b90e84... First
 
 		POST: (updates/creates)
 		in: id, name, email, avatar
@@ -36,8 +31,4 @@ npm install
 
 Use
 ====
-<<<<<<< HEAD
 npm start
-=======
-npm start
->>>>>>> 1b90e84... First
