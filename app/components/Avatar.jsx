@@ -4,28 +4,28 @@ import classNames from 'classnames/bind';
 import pickerStyles from './AvatarPicker.css';
 const cx = classNames.bind(pickerStyles);
 
-// require('./assets/css/myapp.css');
-
 
 class AvatarPicker extends Component {
   constructor(props) {
     super(props);
-    console.log(props + " " + JSON.stringify(props) + " PROPS");
-    this.state = {
-      value: props.value, // initialize state from value prop given by redux-form
+    this.state = 
+    {
+      value: props.value, 
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) 
+  {
     this.setState({ value: nextProps.value }); // update state when props change
   }
 
-  updateValue(value) {
-    this.setState({ value });  // change local state
-    // this.props.onChange(value);     // notify redux-form
+  updateValue(value) 
+  {
+    this.setState({ value });  
   }
 
-  render() {
+  render() 
+  {
     this.avatarHelper = new AvatarHelper();
     console.log(this.state.value + " this.state.value");
     var handler  =   this.props.handler;
@@ -35,10 +35,8 @@ class AvatarPicker extends Component {
           {this.avatarHelper.getAvatarKeys().map(avatarOption => (
             <li
               onClick={(e) => {
-                console.log(avatarOption);
                 this.updateValue(avatarOption);
                 this.props.handler(avatarOption);
-                console.log(this.state.value + " " + avatarOption);
               }}
               key={avatarOption}
               className=  "element">
@@ -52,7 +50,8 @@ class AvatarPicker extends Component {
   }
 }
 
-AvatarPicker.propTypes = {
+AvatarPicker.propTypes = 
+{
   value: PropTypes.string.isRequired,
   handler: PropTypes.func
 };

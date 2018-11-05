@@ -55,8 +55,6 @@ class CreateUser extends React.Component {
     }
 
      handleChange(val) {
-        // const val = event.target.value;
-        console.log(val + " handling change? " );
         this.setState({avatar: val})
       }
 

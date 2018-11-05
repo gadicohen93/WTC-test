@@ -11,12 +11,7 @@ mongoose.connect("mongodb://localhost:27017/test");
 app.set("port", process.env.PORT || 3000);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(cookieParser());
-// app.use(session({
-//   secret: "very important secret",
-//   resave: true,
-//   saveUninitialized: true
-// }));
+
 
 app.use(express.static('public'));
 
