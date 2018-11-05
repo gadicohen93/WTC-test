@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8"/>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Raleway:700" rel="stylesheet">
+      <style>
+        h1
+        {
+          font-family: 'Raleway', sans-serif;
+          font-weight:1000;
+          font-size: 70px;
+          letter-spacing: -3px;
+          margin-left:40px;
+        }
+
+        .form-control, .btn {
+            margin-bottom: 20px;
+            width: 50% !important;
+        }
+
+        a, a:visited, a:hover, a:active {
+          text-decoration: none;
+          color: inherit;
+        }
+
+        input, .input
+        {
+            font-family: 'Montserrat', serif;
+            background: transparent;
+            border: 0;
+            border-bottom: 1px solid white;
+            box-sizing: border-box;
+            color: black;
+            display: block;
+            font-size: 16px;
+            margin-bottom: 30px;
+            outline: none !important;
+            padding-bottom: 15px;
+            padding-left: 50px;
+            width: 100%;
+        }
+
+        .input
+        {
+            opacity: .7;
+        }
+
+        .existsAccount
+        {
+            font-family: 'Montserrat', serif;
+            color:red;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<script>
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker
+       .register('/sw.js')
+       .then(function() { 
+        console.log("Service Worker Registered"); 
+        });
+
+
+
+navigator.serviceWorker.ready.then((swRegistration) => {
+  return swRegistration.sync.register('event1')
+});
+
+
+window.addEventListener('load', function() {
+  function updateOnlineStatus(event) {
+    
+      if (navigator.onLine) 
+      {
+          console.log("online");
+          navigator.serviceWorker.ready.then(function(registration) 
+          {
+            console.log("hello");
+              registration.sync.register('sendAll').then(function() 
+              {
+                console.log("registration succeeded");
+                // registration succeeded
+              }, 
+              function() {
+                // registration failed
+              });
+          });
+
+
+          fetch('/triggerSync/', {
+                credentials: 'same-origin',
+                method: 'GET'
+            }).then(function (response) {
+                console.log(response);
+
+            });
+        } 
+       else 
+       {
+        console.log("offline");
+       
+      }
+    }
+
+
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+    }); 
+}
+
+</script>
+
+<div id="app"></div>
+<script src="bundle.js"></script>
+
+</body>
+</html>
