@@ -25,9 +25,9 @@ endpoint:
 
 Install
 =======
-make sure MongoDB is running on port 27017
-npm install -g webpack
-npm install
+make sure MongoDB is running on port 27017  
+npm install -g webpack  
+npm install  
 
 Use
 ====
