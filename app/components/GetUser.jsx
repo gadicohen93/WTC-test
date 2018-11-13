@@ -24,21 +24,8 @@ class GetUser extends React.Component {
                 credentials: 'same-origin',
                 method: 'GET'
             }).then(function (response) {
-                console.log(response);
-                  return response.json() 
-
-                if(response.status == 200) 
-                {
-                    // hashHistory.push('/');
-                }
-                else {
-                    alert("Login failed");
-                    console.log("Login failed");
-                    this.setState(errorFetch:true);
-                }
-
+                return response.json() 
             }).then(responseJson => {
-                console.log("GOT AVATAR NAME " + JSON.stringify(responseJson));
                 if (responseJson["success"])
                 {
                     this.setState({editing:true, name: responseJson.name, email: responseJson.email, accountExists:true, avatarURL: responseJson.avatar});
@@ -49,7 +36,7 @@ class GetUser extends React.Component {
                 }
             }).catch( (err) =>
             {
-                console.log(err + " < this is the error");
+                console.log(err);
                 this.setState({errorFetch: true});
             });
         }
@@ -59,59 +46,40 @@ class GetUser extends React.Component {
         event.preventDefault();
         var name = this.refs.name.value;
         var email = this.refs.email.value;
-        if (name.length == 0 || email.length == 0) {
-            //show username error
-        }
-        else {
-            fetch('/user/' + this.refs.id.value, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: name,
-                    email: email,
-                    avatar: this.state.avatarURL
-                }),
-                error: function()
-                {
-                    console.log("error");
-                }
-            }).then(function (response) {
-                // this.setState(userAccount: name + " " + email);
-
-                // if (response.status >= 400)
-                // {
-                //     this.setState(error: true);
-                // }
-                // else
-                // {
-                //     this.setState(error:false, userAccount:true);
-                // }
-
-                if(response.status == 200) 
-                {
-                    hashHistory.push('/');
-                }
-                else {
-                    this.setState({error:true});
-                }
-
-                return response.text();
-                // if (response.status == 200) {
-                //     hashHistory.push('/login');                
-                // }
-                // else {
-                //     alert("Sign up failed! most likely user name is not available");
-                // }
-            }).then(function (text)
+       
+        fetch('/user/' + this.refs.id.value, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                avatar: this.state.avatarURL
+            }),
+            error: function(err)
             {
-                console.log(text);
-            }).catch( (err) =>
+                console.log("error:" + err);
+            }
+        }).then(function (response) {
+          
+            if(response.status == 200) 
             {
-                this.setState({errorFetch: true});
-            });
-        }
+                hashHistory.push('/');
+            }
+            else {
+                this.setState({error:true});
+            }
+
+            return response.text();
+        
+        }).then(function (text)
+        {
+            // console.log(text);
+        }).catch( (err) =>
+        {
+            this.setState({errorFetch: true});
+        });
     }
 
     editAvatar()

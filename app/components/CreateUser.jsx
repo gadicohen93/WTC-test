@@ -19,11 +19,7 @@ class CreateUser extends React.Component {
         var name = this.refs.name.value;
         var email = this.refs.email.value;
         var avatar = this.state.avatar;
-        console.log(avatar + " " + " AVATAR");
-        if (name.length == 0 || email.length == 0) {
-            //show username error
-        }
-        else {
+       
             fetch('/user/', {
                 method: 'POST',
                 headers: {
@@ -35,23 +31,20 @@ class CreateUser extends React.Component {
                     avatar: avatar
                 })
             }).then(function (response) {
-                console.log(response.body);
-
                 if (response.status == 200) {
                     hashHistory.push('/');                
                 }
-                
                 return response.text();
 
             }).then(function (text)
             {
-                console.log(text);
+                console.log("User ID:  " + text);
             }).catch( (err) =>
             {
                 this.setState({error: true});
 
             });;
-        }
+      
     }
 
      handleChange(val) {

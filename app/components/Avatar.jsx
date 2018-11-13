@@ -27,7 +27,6 @@ class AvatarPicker extends Component {
   render() 
   {
     this.avatarHelper = new AvatarHelper();
-    console.log(this.state.value + " this.state.value");
     var handler  =   this.props.handler;
     return (
       <div>
